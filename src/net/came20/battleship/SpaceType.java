@@ -9,7 +9,8 @@ public enum SpaceType {
     SUBMARINE(3), //3
     BATTLESHIP(4), //4
     AIRCRAFT_CARRIER(5), //5
-    NONE(0);
+    NONE(0),
+    ERROR(-1);
 
     private int length;
 
