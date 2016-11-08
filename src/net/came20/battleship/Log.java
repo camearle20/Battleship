@@ -8,15 +8,8 @@ package net.came20.battleship;
  * be present, it is most likely not an official package,
  * released by myself (came20), and should be used with caution
  */
-public enum ShipDirection {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    UP_LEFT,
-    UP_RIGHT,
-    DOWN_LEFT,
-    DOWN_RIGHT,
-    NONE,
-    ERROR;
+public class Log {
+    public static void d(String data) {
+        System.out.println("DEBUG: " + data);
+    }
 }
