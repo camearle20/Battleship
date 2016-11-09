@@ -1,5 +1,7 @@
 package net.came20.battleship;
 
+import net.came20.battleship.board.*;
+
 import java.util.Scanner;
 
 /**

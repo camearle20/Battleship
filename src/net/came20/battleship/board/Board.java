@@ -1,5 +1,7 @@
-package net.came20.battleship;
+package net.came20.battleship.board;
 
+
+import net.came20.battleship.Log;
 
 /**
  * came20's Battleship
@@ -32,13 +34,7 @@ public class Board {
     }
 
     public BoardSpace[][] getBoardArray(SpaceOwner owner) {
-        if (owner == SpaceOwner.PLAYER) {
-            return board[0];
-        } else if (owner == SpaceOwner.OPPONENT) {
-            return board[1];
-        } else {
-            return null;
-        }
+        return board[owner.getLayer()];
     }
 
     public int getNumRows() {
@@ -62,32 +58,15 @@ public class Board {
         if (!checkBounds(row, col)) {
             return SpaceType.ERROR;
         }
-
-        if (owner == SpaceOwner.PLAYER) {
-            return board[0][row][col].getType();
-        } else if (owner == SpaceOwner.OPPONENT) {
-            return board[1][row][col].getType();
-        } else {
-            return SpaceType.ERROR;
-        }
+        return board[owner.getLayer()][row][col].getType();
     }
 
     public int findNumRemaining(SpaceType type, SpaceOwner owner) {
         int i = 0;
-        if (owner == SpaceOwner.PLAYER) {
-            for (BoardSpace[] spaces : board[0]) {
-                for (BoardSpace space : spaces) {
-                    if (space.getType() == type) {
-                        i++;
-                    }
-                }
-            }
-        } else if (owner == SpaceOwner.OPPONENT) {
-            for (BoardSpace[] spaces : board[1]) {
-                for (BoardSpace space : spaces) {
-                    if (space.getType() == type) {
-                        i++;
-                    }
+        for (BoardSpace[] spaces : board[owner.getLayer()]) {
+            for (BoardSpace space : spaces) {
+                if (space.getType() == type) {
+                    i++;
                 }
             }
         }
@@ -100,15 +79,61 @@ public class Board {
         }
         SpaceType type = getSpaceType(row, col, owner);
         if (type != SpaceType.NONE) {
-            if (owner == SpaceOwner.PLAYER) {
-                board[0][row][col].setType(SpaceType.SUNK);
-            } else if (owner == SpaceOwner.OPPONENT) {
-                board[1][row][col].setType(SpaceType.SUNK);
-            } else {
-                return null;
-            }
+            board[owner.getLayer()][row][col].setType(SpaceType.SUNK);
         }
         return type;
+    }
+
+    public boolean checkPossible(int row, int col, SpaceType type, ShipDirection direction, SpaceOwner owner) {
+        switch (direction) {
+            case UP:
+                if (!checkBounds(row - (type.getLength() - 1), col)) {
+                    return false;
+                }
+                for (int i = row; i > row - type.getLength(); i--) {
+                    if (getSpaceType(i, col, owner) != SpaceType.NONE) {
+                        Log.d("Space is taken");
+                        return false;
+                    }
+                }
+                break;
+            case DOWN:
+                if (!checkBounds(row + (type.getLength() - 1), col)) {
+                    return false;
+                }
+                for (int i = row; i < row + type.getLength(); i++) {
+                    if (getSpaceType(i, col, owner) != SpaceType.NONE) {
+                        Log.d("Space is taken");
+                        return false;
+                    }
+                }
+                break;
+            case LEFT:
+                if (!checkBounds(row, col - (type.getLength() - 1))) {
+                    return false;
+                }
+                for (int i = col; i > col - type.getLength(); i--) {
+                    if (getSpaceType(row, i, owner) != SpaceType.NONE) {
+                        Log.d("Space is taken");
+                        return false;
+                    }
+                }
+                break;
+            case RIGHT:
+                if (!checkBounds(row, col + (type.getLength() - 1))) {
+                    return false;
+                }
+                for (int i = col; i < col + type.getLength(); i++) {
+                    if (getSpaceType(row, i, owner) != SpaceType.NONE) {
+                        Log.d("Space is taken");
+                        return false;
+                    }
+                }
+                break;
+            default:
+                return false;
+        }
+        return true;
     }
 
     public boolean placeShip(int row, int col, ShipDirection direction, SpaceType type, SpaceOwner owner) {
@@ -116,89 +141,29 @@ public class Board {
             return false;
         }
 
+        if (!checkPossible(row, col, type, direction, owner)) {
+            return false;
+        }
+
         switch (direction) {
             case UP:
-                if (!checkBounds(row - (type.getLength()-1), col)) {
-                    return false;
-                }
-                for (int i = row; i > row-type.getLength(); i--) {
-                    if (getSpaceType(i, col, owner) != SpaceType.NONE) {
-                        Log.d("Space is taken");
-                        return false;
-                    }
-                }
-
                 for (int j = row; j > row-type.getLength(); j--) {
-                    if (owner == SpaceOwner.PLAYER) {
-                        board[0][j][col].setType(type);
-                    } else if (owner == SpaceOwner.OPPONENT) {
-                        board[1][j][col].setType(type);
-                    } else {
-                        return false;
-                    }
+                    board[owner.getLayer()][j][col].setType(type);
                 }
                 break;
             case DOWN:
-                if (!checkBounds(row + (type.getLength()-1), col)) {
-                    return false;
-                }
-                for (int i = row; i < row+type.getLength(); i++) {
-                    if (getSpaceType(i, col, owner) != SpaceType.NONE) {
-                        Log.d("Space is taken");
-                        return false;
-                    }
-                }
-
                 for (int j = row; j < row+type.getLength(); j++) {
-                    if (owner == SpaceOwner.PLAYER) {
-                        board[0][j][col].setType(type);
-                    } else if (owner == SpaceOwner.OPPONENT) {
-                        board[1][j][col].setType(type);
-                    } else {
-                        return false;
-                    }
+                    board[owner.getLayer()][j][col].setType(type);
                 }
                 break;
             case LEFT:
-                if (!checkBounds(row, col - (type.getLength()-1))) {
-                    return false;
-                }
-                for (int i = col; i > col-type.getLength(); i--) {
-                    if (getSpaceType(row, i, owner) != SpaceType.NONE) {
-                        Log.d("Space is taken");
-                        return false;
-                    }
-                }
-
                 for (int j = col; j > col-type.getLength(); j--) {
-                    if (owner == SpaceOwner.PLAYER) {
-                        board[0][row][j].setType(type);
-                    } else if (owner == SpaceOwner.OPPONENT) {
-                        board[1][row][j].setType(type);
-                    } else {
-                        return false;
-                    }
+                    board[owner.getLayer()][row][j].setType(type);
                 }
                 break;
             case RIGHT:
-                if (!checkBounds(row, col + (type.getLength()-1))) {
-                    return false;
-                }
-                for (int i = col; i < col+type.getLength(); i++) {
-                    if (getSpaceType(row, i, owner) != SpaceType.NONE) {
-                        Log.d("Space is taken");
-                        return false;
-                    }
-                }
-
                 for (int j = col; j < col+type.getLength(); j++) {
-                    if (owner == SpaceOwner.PLAYER) {
-                        board[0][row][j].setType(type);
-                    } else if (owner == SpaceOwner.OPPONENT) {
-                        board[1][row][j].setType(type);
-                    } else {
-                        return false;
-                    }
+                    board[owner.getLayer()][row][j].setType(type);
                 }
                 break;
             default:

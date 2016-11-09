@@ -1,4 +1,4 @@
-package net.came20.battleship;
+package net.came20.battleship.board;
 
 /**
  * came20's Battleship

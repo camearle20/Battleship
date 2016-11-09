@@ -1,4 +1,4 @@
-package net.came20.battleship;
+package net.came20.battleship.board;
 
 /**
  * Created by cameron on 11/5/16.
