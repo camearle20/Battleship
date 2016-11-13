@@ -3,6 +3,8 @@ package net.came20.battleship.board;
 
 import net.came20.battleship.Log;
 
+import javax.swing.JLabel;
+
 /**
  * came20's Battleship
  * Copyright (C) 2016 came20 (http://came20.net)
@@ -22,19 +24,24 @@ public class Board {
         board = new BoardSpace[2][num_rows][num_cols];
         for (int row = 0; row < board[0].length; row++) { //Set up player board
             for (int col = 0; col < board[0][row].length; col++) {
-                board[0][row][col] = new BoardSpace(SpaceOwner.PLAYER, SpaceType.NONE);
+                board[0][row][col] = new BoardSpace(SpaceOwner.PLAYER, SpaceType.NONE, new JLabel());
             }
         }
 
         for (int row = 0; row < board[1].length; row++) { //Set up opponent board
             for (int col = 0; col < board[1][row].length; col++) {
-                board[1][row][col] = new BoardSpace(SpaceOwner.OPPONENT, SpaceType.NONE);
+                board[1][row][col] = new BoardSpace(SpaceOwner.OPPONENT, SpaceType.NONE, new JLabel());
             }
         }
     }
 
+
     public BoardSpace[][] getBoardArray(SpaceOwner owner) {
         return board[owner.getLayer()];
+    }
+
+    public void setBoardArray(BoardSpace[][] spaces, SpaceOwner owner) {
+        board[owner.getLayer()] = spaces;
     }
 
     public int getNumRows() {
@@ -73,13 +80,13 @@ public class Board {
         return i;
     }
 
-    public SpaceType fire(int row, int col, SpaceOwner owner) {
-        if (!checkBounds(row, col)) {
+    public SpaceType fire(Move move) {
+        if (!checkBounds(move.getRow(), move.getCol())) {
             return SpaceType.ERROR;
         }
-        SpaceType type = getSpaceType(row, col, owner);
+        SpaceType type = getSpaceType(move.getRow(), move.getCol(), move.getOwner());
         if (type != SpaceType.NONE) {
-            board[owner.getLayer()][row][col].setType(SpaceType.SUNK);
+            board[move.getOwner().getLayer()][move.getRow()][move.getCol()].setType(SpaceType.SUNK);
         }
         return type;
     }
